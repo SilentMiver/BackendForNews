@@ -13,13 +13,13 @@ import org.example.repositories.NewRepository;
 import org.example.services.NewService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,37 +44,70 @@ public class NewServiceImpl implements NewService {
 
 
     @Override
-    public List<NewDTO> searchAll(String q) {
+    public List<NewDTO> searchAll(String query) {
+        List<NewDTO> result;
         try {
-            String encodedQuery = URLEncoder.encode(q, StandardCharsets.UTF_8);
-            HttpResponse httpResponse = httpClient.execute(new HttpGet(String.format(url, encodedQuery, 0, "day")));
+            HttpResponse httpResponse = httpClient.execute(new HttpGet(String.format(url, URLEncoder.encode(query, StandardCharsets.UTF_8), 0, "day")));
             HttpEntity entity = httpResponse.getEntity();
             if (entity != null) {
                 NewsApiResponseDTO responseDTO = gson.fromJson(EntityUtils.toString(entity), NewsApiResponseDTO.class);
-                newRepository.saveAll(responseDTO.getNews().stream().map((r) -> modelMapper.map(r, New.class)).collect(Collectors.toList()));
+                int iter = Math.ceilDiv(responseDTO.getTotal(), 20);
+                result = new ArrayList<>(iter * 20);
+                newRepository.saveAll(responseDTO.getNews()
+                        .stream()
+                        .map((r) -> modelMapper.map(r, New.class))
+                        .collect(Collectors.toList()));
+                result.addAll(responseDTO.getNews());
+                EntityUtils.consume(entity);
+                for (int i = 1; i < iter; i++) {
+                    result.addAll(search(query, i));
+                }
+                return result;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return List.of();
+    }
+
+    @Override
+    public List<NewDTO> search(String query, int page) {
+        try {
+            HttpResponse httpResponse = httpClient.execute(new HttpGet(String.format(url, URLEncoder.encode(query, StandardCharsets.UTF_8), page, "day")));
+            HttpEntity entity = httpResponse.getEntity();
+            if (entity != null) {
+                NewsApiResponseDTO responseDTO = gson.fromJson(EntityUtils.toString(entity), NewsApiResponseDTO.class);
+                newRepository.saveAll(responseDTO.getNews()
+                        .stream()
+                        .map((r) -> modelMapper.map(r, New.class))
+                        .collect(Collectors.toList()));
                 EntityUtils.consume(entity);
                 return responseDTO.getNews();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return null;
+        return List.of();
     }
 
-    @Override
-    public Optional<NewDTO> search(String query) {
-        return Optional.empty();
-    }
 
     @Override
     public List<NewDTO> findAll(String query) {
-        return null;
+        List<New> result = newRepository.findByTitleRegexIgnoreCase(".*"+query+".*");
+        System.out.println(result.size());
+        return result
+                .stream()
+                .map((n)-> modelMapper.map(n, NewDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<NewDTO> find(String query) {
-        return Optional.empty();
+    public List<NewDTO> find(String query, int page) {
+        return newRepository.findPageByTitleRegexIgnoreCase(".*"+query+".*",PageRequest.of(page,20))
+                .map((n)->modelMapper.map(n, NewDTO.class))
+                .toList();
     }
+
 
     @Override
     public List<NewDTO> findRatingAll() {

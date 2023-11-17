@@ -31,6 +31,10 @@ public class New {
         this.regionName = regionName;
     }
 
+    public long getId() {
+        return id;
+    }
+
     public long getTimestamp() {
         return timestamp;
     }
@@ -87,6 +91,10 @@ public class New {
 
     public void setTraffic(String traffic) {
         this.traffic = traffic;
+    }
+
+    protected void setId(long id) {
+        this.id = id;
     }
 
     @Override

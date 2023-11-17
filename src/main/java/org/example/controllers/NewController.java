@@ -17,9 +17,25 @@ public class NewController {
     public NewController(NewService newService) {
         this.newService = newService;
     }
-    @GetMapping()
-    public Iterable<NewDTO> searchAll(@RequestParam String query){
+
+    @GetMapping("/search/all")
+    public Iterable<NewDTO> searchAll(@RequestParam("q") String query) {
         return newService.searchAll(query);
+    }
+
+    @GetMapping("/search")
+    public Iterable<NewDTO> search(@RequestParam("q") String query, @RequestParam("p") int page) {
+        return newService.search(query, page);
+    }
+
+    @GetMapping("/find/all")
+    public Iterable<NewDTO> findAll(@RequestParam("q") String query) {
+        return newService.findAll(query);
+    }
+
+    @GetMapping("/find")
+    public Iterable<NewDTO> find(@RequestParam("q") String query, @RequestParam("p") int page) {
+        return newService.find(query, page);
     }
 
 }
