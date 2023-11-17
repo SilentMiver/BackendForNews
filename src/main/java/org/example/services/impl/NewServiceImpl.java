@@ -14,6 +14,7 @@ import org.example.services.NewService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -92,19 +93,35 @@ public class NewServiceImpl implements NewService {
 
 
     @Override
-    public List<NewDTO> findAll(String query) {
-        List<New> result = newRepository.findByTitleRegexIgnoreCase(".*"+query+".*");
-        System.out.println(result.size());
+    public List<NewDTO> findAll(String query, Sort sort) {
+        List<New> result = newRepository.findByTitleRegexIgnoreCase(".*" + query + ".*", sort);
         return result
                 .stream()
-                .map((n)-> modelMapper.map(n, NewDTO.class))
+                .map((n) -> modelMapper.map(n, NewDTO.class))
                 .collect(Collectors.toList());
     }
 
     @Override
+    public List<NewDTO> findAll(String query) {
+        List<New> result = newRepository.findByTitleRegexIgnoreCase(".*" + query + ".*");
+        System.out.println(result.size());
+        return result
+                .stream()
+                .map((n) -> modelMapper.map(n, NewDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<NewDTO> find(String query, int page, Sort sort) {
+        return newRepository.findPageByTitleRegexIgnoreCase(".*" + query + ".*", PageRequest.of(page, 20).withSort(sort))
+                .map((n) -> modelMapper.map(n, NewDTO.class))
+                .toList();
+    }
+
+    @Override
     public List<NewDTO> find(String query, int page) {
-        return newRepository.findPageByTitleRegexIgnoreCase(".*"+query+".*",PageRequest.of(page,20))
-                .map((n)->modelMapper.map(n, NewDTO.class))
+        return newRepository.findPageByTitleRegexIgnoreCase(".*" + query + ".*", PageRequest.of(page, 20))
+                .map((n) -> modelMapper.map(n, NewDTO.class))
                 .toList();
     }
 
