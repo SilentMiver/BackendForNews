@@ -1,11 +1,9 @@
 package org.example.services;
 
 import org.example.dtos.NewDTO;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface NewService {
     List<NewDTO> searchAll(String query);
@@ -20,8 +18,12 @@ public interface NewService {
 
     List<NewDTO> find(String query, int page);
 
-    List<NewDTO> findRatingAll();
+    List<NewDTO> get(String query, int page);
 
-    List<NewDTO> searchRatingAll();
+    List<NewDTO> get(String query, int page, Sort sort);
+
+    List<NewDTO> getAll(String query);
+
+    List<NewDTO> getAll(String query, Sort sort);
 
 }

@@ -1,7 +1,6 @@
 package org.example.dtos;
 
 import com.google.gson.annotations.SerializedName;
-import org.example.models.New;
 
 import java.util.List;
 

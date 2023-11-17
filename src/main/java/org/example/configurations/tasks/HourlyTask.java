@@ -5,16 +5,18 @@
 //import org.apache.http.client.HttpClient;
 //import org.apache.http.client.methods.HttpGet;
 //import org.apache.http.util.EntityUtils;
-//import org.example.dtos.NewsApiResponseDTO;
-//import org.example.models.New;
-//import org.example.repositories.NewRepository;
+//import org.example.dtos.NewRatingDTO;
+//import org.example.models.NewRating;
+//import org.example.repositories.NewRatingRepository;
 //import org.modelmapper.ModelMapper;
+//import org.modelmapper.TypeToken;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.scheduling.annotation.EnableScheduling;
 //import org.springframework.scheduling.annotation.Scheduled;
 //import org.springframework.stereotype.Component;
 //
 //import java.io.IOException;
+//import java.util.List;
 //import java.util.stream.Collectors;
 //
 //
@@ -24,7 +26,7 @@
 //    private final HttpClient httpClient;
 //    private final ModelMapper modelMapper;
 //    private final Gson gson;
-//    private NewRepository newRepository;
+//    private NewRatingRepository newRatingRepository;
 //
 //    @Autowired
 //    public HourlyTask(HttpClient httpClient, Gson gson, ModelMapper modelMapper) {
@@ -34,18 +36,22 @@
 //    }
 //
 //    @Autowired
-//    public void setNewRepository(NewRepository newRepository) {
-//        this.newRepository = newRepository;
+//    public void setNewRatingRepository(NewRatingRepository newRatingRepository) {
+//        this.newRatingRepository = newRatingRepository;
 //    }
+//
 //
 //    @Scheduled(fixedRate = 3600000)
 //    public void getRatingNews() {
 //        try {
 //            String url = "https://mediametrics.ru/rating/ru/hour.json";
 //            HttpEntity entity = httpClient.execute(new HttpGet(url)).getEntity();
-//            NewsApiResponseDTO responseDTO = gson.fromJson(EntityUtils.toString(entity), NewsApiResponseDTO.class);
+//            List<NewRatingDTO> response = gson.fromJson(EntityUtils.toString(entity), new TypeToken<List<NewRatingDTO>>() {}.getType());
 //            EntityUtils.consume(entity);
-//            newRepository.saveAll(responseDTO.getNews().stream().map((r) -> modelMapper.map(r, New.class)).collect(Collectors.toList()));
+//            newRatingRepository.saveAll(response
+//                    .stream()
+//                    .map((r) -> modelMapper.map(r, NewRating.class))
+//                    .collect(Collectors.toList()));
 //        } catch (IOException e) {
 //            throw new RuntimeException(e);
 //        }

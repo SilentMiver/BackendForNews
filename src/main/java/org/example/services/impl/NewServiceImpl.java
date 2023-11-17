@@ -20,7 +20,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +38,7 @@ public class NewServiceImpl implements NewService {
         this.httpClient = httpClient;
         this.gson = gson;
     }
+
 
     @Autowired
     public void setNewRepository(NewRepository newRepository) {
@@ -125,14 +127,24 @@ public class NewServiceImpl implements NewService {
                 .toList();
     }
 
-
     @Override
-    public List<NewDTO> findRatingAll() {
+    public List<NewDTO> get(String query, int page) {
         return null;
     }
 
     @Override
-    public List<NewDTO> searchRatingAll() {
+    public List<NewDTO> get(String query, int page, Sort sort) {
         return null;
     }
+
+    @Override
+    public List<NewDTO> getAll(String query) {
+        return null;
+    }
+
+    @Override
+    public List<NewDTO> getAll(String query, Sort sort) {
+        return null;
+    }
+
 }
