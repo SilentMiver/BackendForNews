@@ -1,12 +1,14 @@
 package org.example.models;
 
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
-import java.util.Date;
 
-@Document
+@Document(collection = "new")
 public class New {
-    private Date date;
+    @MongoId
+    private long id;
+    private long timestamp;
     private String title;
     private String domain;
     private String country;
@@ -14,12 +16,13 @@ public class New {
 
     private String countryName;
     private String regionName;
-    protected New(){
+
+    protected New() {
 
     }
 
-    public New(Date date, String title, String domain, String country, String traffic, String countryName, String regionName) {
-        this.date = date;
+    public New(long timestamp, String title, String domain, String country, String traffic, String countryName, String regionName) {
+        this.timestamp = timestamp;
         this.title = title;
         this.domain = domain;
         this.country = country;
@@ -28,8 +31,8 @@ public class New {
         this.regionName = regionName;
     }
 
-    public Date getDate() {
-        return date;
+    public long getTimestamp() {
+        return timestamp;
     }
 
     public String getTitle() {
@@ -57,8 +60,8 @@ public class New {
         return traffic;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 
     public void setTitle(String title) {
@@ -89,7 +92,7 @@ public class New {
     @Override
     public String toString() {
         return "New{" +
-                "date=" + date +
+                "timestamp=" + timestamp +
                 ", title='" + title + '\'' +
                 ", domain='" + domain + '\'' +
                 ", country='" + country + '\'' +

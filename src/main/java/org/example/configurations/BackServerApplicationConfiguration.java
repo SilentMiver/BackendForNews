@@ -1,8 +1,11 @@
 package org.example.configurations;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.example.configurations.adapters.NewDTOAdapter;
+import org.example.dtos.NewDTO;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,8 +25,9 @@ public class BackServerApplicationConfiguration {
     public HttpClient httpClient() {
         return HttpClients.createMinimal();
     }
+
     @Bean
-    public Gson gson(){
-        return new Gson();
+    public Gson gson() {
+        return new GsonBuilder().registerTypeAdapter(Long.class, new NewDTOAdapter()).create();
     }
 }
