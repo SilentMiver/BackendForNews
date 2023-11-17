@@ -14,6 +14,19 @@ public class New {
 
     private String countryName;
     private String regionName;
+    protected New(){
+
+    }
+
+    public New(Date date, String title, String domain, String country, String traffic, String countryName, String regionName) {
+        this.date = date;
+        this.title = title;
+        this.domain = domain;
+        this.country = country;
+        this.traffic = traffic;
+        this.countryName = countryName;
+        this.regionName = regionName;
+    }
 
     public Date getDate() {
         return date;

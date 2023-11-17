@@ -35,6 +35,10 @@ public class NewsApiResponseDTO {
         return traffic;
     }
 
+    public int getPageLength() {
+        return pageLength;
+    }
+
     public void setStatus(String status) {
         this.status = status;
     }
@@ -55,6 +59,10 @@ public class NewsApiResponseDTO {
         this.traffic = traffic;
     }
 
+    public void setPageLength(int pageLength) {
+        this.pageLength = pageLength;
+    }
+
     @Override
     public String toString() {
         return "NewsApiResponseDTO{" +
@@ -62,6 +70,7 @@ public class NewsApiResponseDTO {
                 ", page=" + page +
                 ", news=" + news +
                 ", total=" + total +
+                ", pageLength=" + pageLength +
                 ", traffic='" + traffic + '\'' +
                 '}';
     }
