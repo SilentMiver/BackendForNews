@@ -21,7 +21,8 @@ public class New {
 
     }
 
-    public New(long timestamp, String title, String domain, String country, String traffic, String countryName, String regionName) {
+    public New(long id, long timestamp, String title, String domain, String country, String traffic, String countryName, String regionName) {
+        this.id = id;
         this.timestamp = timestamp;
         this.title = title;
         this.domain = domain;
@@ -38,6 +39,7 @@ public class New {
     public long getTimestamp() {
         return timestamp;
     }
+
 
     public String getTitle() {
         return title;
@@ -100,7 +102,8 @@ public class New {
     @Override
     public String toString() {
         return "New{" +
-                "timestamp=" + timestamp +
+                "id=" + id +
+                ", timestamp=" + timestamp +
                 ", title='" + title + '\'' +
                 ", domain='" + domain + '\'' +
                 ", country='" + country + '\'' +

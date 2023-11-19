@@ -19,8 +19,12 @@ public class CollectionsConfiguration {
     @PostConstruct
     public void initialIndexes() {
         if (mongoTemplate.indexOps("new").getIndexInfo()
-                .stream().
-                noneMatch(indexInfo -> indexInfo.getName().equals("title_1")))
+                .stream()
+                        .noneMatch(indexInfo -> indexInfo.getName().equals("title_1")))
             mongoTemplate.indexOps("new").ensureIndex(new Index().on("title", Sort.Direction.ASC).named("title_1"));
+        if(mongoTemplate.indexOps("new").getIndexInfo()
+                .stream()
+                .noneMatch(indexInfo -> indexInfo.getName().equals("timestamp_1")))
+            mongoTemplate.indexOps("new").ensureIndex(new Index().on("timestamp",Sort.Direction.DESC).named("timestamp_1"));
     }
 }

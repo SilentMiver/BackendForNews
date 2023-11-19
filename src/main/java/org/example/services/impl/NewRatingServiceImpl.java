@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+
 @Service
 
 public class NewRatingServiceImpl implements NewRatingService {
@@ -41,7 +42,10 @@ public class NewRatingServiceImpl implements NewRatingService {
 
     @Override
     public List<NewRatingDTO> findRatingAll() {
-        return null;
+        return newRatingRepository.findAll()
+                .stream()
+                .map((n) -> modelMapper.map(n, NewRatingDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -50,10 +54,11 @@ public class NewRatingServiceImpl implements NewRatingService {
             HttpResponse httpResponse = httpClient.execute(new HttpGet(url));
             HttpEntity entity = httpResponse.getEntity();
             if (entity != null) {
-                List<NewRatingDTO> response = gson.fromJson(EntityUtils.toString(entity), new TypeToken<List<NewRatingDTO>>() {}.getType());
+                List<NewRatingDTO> response = gson.fromJson(EntityUtils.toString(entity), new TypeToken<List<NewRatingDTO>>() {
+                }.getType());
                 newRatingRepository.saveAll(response
                         .stream()
-                        .map(nr->modelMapper.map(nr, NewRating.class))
+                        .map(nr -> modelMapper.map(nr, NewRating.class))
                         .collect(Collectors.toList()));
                 EntityUtils.consume(entity);
                 return response;

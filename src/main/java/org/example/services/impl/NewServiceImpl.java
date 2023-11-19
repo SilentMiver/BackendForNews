@@ -139,12 +139,24 @@ public class NewServiceImpl implements NewService {
 
     @Override
     public List<NewDTO> getAll(String query) {
-        return null;
+        List<New> findList = newRepository.findByTitleRegexAndTimestampGreaterThan(".*" + query + ".*", System.currentTimeMillis() - 3600000);
+        if (findList.size() < 1) {
+            return searchAll(query);
+        }
+        return findList
+                .stream()
+                .map(n -> modelMapper.map(n, NewDTO.class)).toList();
     }
 
     @Override
     public List<NewDTO> getAll(String query, Sort sort) {
-        return null;
+        List<New> findList = newRepository.findByTitleRegexAndTimestampGreaterThan(".*" + query + ".*", System.currentTimeMillis() - 3600000, sort);
+        if (findList.size() < 1) {
+            return searchAll(query);
+        }
+        return findList
+                .stream()
+                .map(n -> modelMapper.map(n, NewDTO.class)).toList();
     }
 
 }

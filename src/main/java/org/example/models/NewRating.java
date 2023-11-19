@@ -3,8 +3,10 @@ package org.example.models;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
+import java.io.Serializable;
+
 @RedisHash("NewRating")
-public class NewRating {
+public class NewRating implements Serializable {
     @Id
     private long id;
     private String title;

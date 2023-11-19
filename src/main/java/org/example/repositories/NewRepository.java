@@ -23,4 +23,14 @@ public interface NewRepository extends MongoRepository<New, Long> {
     @Query("{'title' : { '$regex': '?0', '$options': 'i' }}")
     Page<New> findPageByTitleRegexIgnoreCase(@Param("keyword") String keyword, Pageable pageable);
 
+    @Query("{'title' : { '$regex': '?0', '$options': 'i' }, 'timestamp': { $gt: ?1 }}")
+    List<New> findByTitleRegexAndTimestampGreaterThan(@Param("keyword") String keyword, @Param("targetTimestamp") long targetTimestamp);
+
+    @Query("{'title' : { '$regex': '?0', '$options': 'i' }, 'timestamp': { $gt: ?1 }}")
+    List<New> findByTitleRegexAndTimestampGreaterThan(@Param("keyword") String keyword, @Param("targetTimestamp") long targetTimestamp, Sort sort);
+
+    @Query("{'title' : { '$regex': '?0', '$options': 'i' }, 'timestamp': { $gt: ?1 }}")
+    Page<New> findPageByTitleRegexAndTimestampGreaterThan(@Param("keyword") String keyword, @Param("targetTimestamp") long targetTimestamp, Pageable pageable);
+
+
 }

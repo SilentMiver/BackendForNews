@@ -1,4 +1,4 @@
-package org.example.controllers;
+package org.example.configurations.controllers;
 
 import org.example.dtos.NewRatingDTO;
 import org.example.services.NewRatingService;
@@ -21,4 +21,10 @@ public class NewRatingController {
     public Iterable<NewRatingDTO> searchAll() {
         return service.searchRatingAll();
     }
+
+    @GetMapping("/find/all")
+    public Iterable<NewRatingDTO> findAll() {
+        return service.findRatingAll();
+    }
+
 }

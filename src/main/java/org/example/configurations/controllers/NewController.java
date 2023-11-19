@@ -1,4 +1,4 @@
-package org.example.controllers;
+package org.example.configurations.controllers;
 
 import org.example.dtos.NewDTO;
 import org.example.services.NewService;
@@ -15,7 +15,6 @@ public class NewController {
     public NewController(NewService newService) {
         this.newService = newService;
     }
-
     @GetMapping("/search/all")
     public Iterable<NewDTO> searchAll(@RequestParam("q") String query) {
         return newService.searchAll(query);
@@ -52,4 +51,8 @@ public class NewController {
     public Iterable<NewDTO> findSortDesc(@RequestParam("q") String query, @RequestParam("p") int page,@PathVariable("sortField") String sortField) {
         return newService.find(query, page,Sort.by(Sort.Direction.DESC, sortField));
     }
+//    @GetMapping("/get")
+//    public Iterable<NewDTO> get(@RequestParam("q") String query){
+//
+//    }
 }
