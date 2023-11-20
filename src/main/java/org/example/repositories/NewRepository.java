@@ -13,15 +13,7 @@ import java.util.List;
 
 
 @Repository
-public interface NewRepository extends MongoRepository<New, Long> {
-    @Query("{'title' : { '$regex': '?0', '$options': 'i' }}")
-    List<New> findByTitleRegexIgnoreCase(@Param("keyword") String keyword);
-
-    @Query("{'title' : { '$regex': '?0', '$options': 'i' }}")
-    List<New> findByTitleRegexIgnoreCase(@Param("keyword") String keyword, Sort sort);
-
-    @Query("{'title' : { '$regex': '?0', '$options': 'i' }}")
-    Page<New> findPageByTitleRegexIgnoreCase(@Param("keyword") String keyword, Pageable pageable);
+public interface NewRepository extends MongoRepository<New, Long>{
 
     @Query("{'title' : { '$regex': '?0', '$options': 'i' }, 'timestamp': { $gt: ?1 }}")
     List<New> findByTitleRegexAndTimestampGreaterThan(@Param("keyword") String keyword, @Param("targetTimestamp") long targetTimestamp);
@@ -32,5 +24,9 @@ public interface NewRepository extends MongoRepository<New, Long> {
     @Query("{'title' : { '$regex': '?0', '$options': 'i' }, 'timestamp': { $gt: ?1 }}")
     Page<New> findPageByTitleRegexAndTimestampGreaterThan(@Param("keyword") String keyword, @Param("targetTimestamp") long targetTimestamp, Pageable pageable);
 
+    @Query(value = "{ 'title' : { $regex: ?0, $options: 'i' }, 'timestamp' : { $gt: ?1 } }", exists = true)
+    boolean existsByTitleRegexIgnoreCaseAndTimestampGreaterThan(String keyword, long targetTimestamp);
 
+    @Query(value = "{ 'title' : { $regex: ?0, $options: 'i' }, 'timestamp' : { $gt: ?1 } }", count = true)
+    Integer countByTitleRegexIgnoreCaseAndTimestampGreaterThan(String keyword, long targetTimestamp);
 }

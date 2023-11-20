@@ -8,9 +8,12 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.example.dtos.NewDTO;
 import org.example.dtos.NewsApiResponseDTO;
+import org.example.exceptions.ServerException;
 import org.example.models.New;
 import org.example.repositories.NewRepository;
 import org.example.services.NewService;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -22,7 +25,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class NewServiceImpl implements NewService {
@@ -30,7 +32,9 @@ public class NewServiceImpl implements NewService {
     private final ModelMapper modelMapper;
     private final HttpClient httpClient;
     private final Gson gson;
-    private static final String url = "https://mediametrics.ru/satellites/api/search/?ac=search&nolimit=1&q=%s&p=%s&d=%s&callback=JSON";
+    private static final long ONE_HOUR = 3600000;
+    private static final long ONE_WEEK = 604800000;
+    private static final long ONE_DAY = 86400000;
 
     @Autowired
     public NewServiceImpl(ModelMapper modelMapper, HttpClient httpClient, Gson gson) {
@@ -47,116 +51,138 @@ public class NewServiceImpl implements NewService {
 
 
     @Override
-    public List<NewDTO> searchAll(String query) {
-        List<NewDTO> result;
-        try {
-            HttpResponse httpResponse = httpClient.execute(new HttpGet(String.format(url, URLEncoder.encode(query, StandardCharsets.UTF_8), 0, "day")));
-            HttpEntity entity = httpResponse.getEntity();
-            if (entity != null) {
-                NewsApiResponseDTO responseDTO = gson.fromJson(EntityUtils.toString(entity), NewsApiResponseDTO.class);
-                int iter = Math.ceilDiv(responseDTO.getTotal(), 20);
-                result = new ArrayList<>(iter * 20);
-                newRepository.saveAll(responseDTO.getNews()
-                        .stream()
-                        .map((r) -> modelMapper.map(r, New.class))
-                        .collect(Collectors.toList()));
-                result.addAll(responseDTO.getNews());
-                EntityUtils.consume(entity);
-                for (int i = 1; i < iter; i++) {
-                    result.addAll(search(query, i));
-                }
-                return result;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    public List<NewDTO> searchAndSaveAll(String query, String day) {
+
+        NewsApiResponseDTO responseDTO = searchNews(query, 0, day);
+        int count = newRepository.countByTitleRegexIgnoreCaseAndTimestampGreaterThan(".*" + query + ".*", getTime(day));
+        if (responseDTO == null || responseDTO.getNews() == null || responseDTO.getTotal() == 0)
+            return List.of();
+        saveNewsToDatabase(responseDTO.getNews());
+        int iter = Math.ceilDiv((responseDTO.getTotal() - count), 20);
+        List<NewDTO> result = new ArrayList<>(20 * iter);
+        for (int i = 1; i <= iter; i++) {
+            result.addAll(search(query, i, day));
         }
-        return List.of();
+        saveNewsToDatabase(result);
+        return findAll(query, Sort.by(Sort.Direction.DESC, "timestamp"), day);
+    }
+
+    private List<NewDTO> search(String query, int page, String day) {
+        NewsApiResponseDTO responseDTO = searchNews(query, page, day);
+        if (responseDTO == null || responseDTO.getNews() == null || responseDTO.getTotal() == 0)
+            return List.of();
+        return responseDTO.getNews();
     }
 
     @Override
-    public List<NewDTO> search(String query, int page) {
-        try {
-            HttpResponse httpResponse = httpClient.execute(new HttpGet(String.format(url, URLEncoder.encode(query, StandardCharsets.UTF_8), page, "day")));
-            HttpEntity entity = httpResponse.getEntity();
-            if (entity != null) {
-                NewsApiResponseDTO responseDTO = gson.fromJson(EntityUtils.toString(entity), NewsApiResponseDTO.class);
-                newRepository.saveAll(responseDTO.getNews()
-                        .stream()
-                        .map((r) -> modelMapper.map(r, New.class))
-                        .collect(Collectors.toList()));
-                EntityUtils.consume(entity);
-                return responseDTO.getNews();
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return List.of();
+    public List<NewDTO> searchAndSave(String query, int page, String day) {
+        NewsApiResponseDTO responseDTO = searchNews(query, page, day);
+        if (responseDTO == null || responseDTO.getNews() == null || responseDTO.getTotal() == 0)
+            return List.of();
+        saveNewsToDatabase(responseDTO.getNews());
+        return responseDTO.getNews();
     }
 
 
     @Override
-    public List<NewDTO> findAll(String query, Sort sort) {
-        List<New> result = newRepository.findByTitleRegexIgnoreCase(".*" + query + ".*", sort);
-        return result
+    public List<NewDTO> findAll(String query, Sort sort, String day) {
+        return newRepository.findByTitleRegexAndTimestampGreaterThan(".*" + query + ".*", getTime(day), sort)
                 .stream()
-                .map((n) -> modelMapper.map(n, NewDTO.class))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<NewDTO> findAll(String query) {
-        List<New> result = newRepository.findByTitleRegexIgnoreCase(".*" + query + ".*");
-        System.out.println(result.size());
-        return result
-                .stream()
-                .map((n) -> modelMapper.map(n, NewDTO.class))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<NewDTO> find(String query, int page, Sort sort) {
-        return newRepository.findPageByTitleRegexIgnoreCase(".*" + query + ".*", PageRequest.of(page, 20).withSort(sort))
-                .map((n) -> modelMapper.map(n, NewDTO.class))
+                .map(n -> modelMapper.map(n, NewDTO.class))
                 .toList();
     }
 
     @Override
-    public List<NewDTO> find(String query, int page) {
-        return newRepository.findPageByTitleRegexIgnoreCase(".*" + query + ".*", PageRequest.of(page, 20))
-                .map((n) -> modelMapper.map(n, NewDTO.class))
+    public List<NewDTO> findAll(String query, String day) {
+        return newRepository.findByTitleRegexAndTimestampGreaterThan(".*" + query + ".*", getTime(day))
+                .stream()
+                .map(n -> modelMapper.map(n, NewDTO.class))
                 .toList();
     }
 
     @Override
-    public List<NewDTO> get(String query, int page) {
-        return null;
-    }
-
-    @Override
-    public List<NewDTO> get(String query, int page, Sort sort) {
-        return null;
-    }
-
-    @Override
-    public List<NewDTO> getAll(String query) {
-        List<New> findList = newRepository.findByTitleRegexAndTimestampGreaterThan(".*" + query + ".*", System.currentTimeMillis() - 3600000);
-        if (findList.size() < 1) {
-            return searchAll(query);
-        }
-        return findList
+    public List<NewDTO> find(String query, int page, Sort sort, String day) {
+        return newRepository.findPageByTitleRegexAndTimestampGreaterThan(".*" + query + ".*", getTime(day), PageRequest.of(page, 20).withSort(sort))
                 .stream()
-                .map(n -> modelMapper.map(n, NewDTO.class)).toList();
+                .map(n -> modelMapper.map(n, NewDTO.class))
+                .toList();
     }
 
     @Override
-    public List<NewDTO> getAll(String query, Sort sort) {
-        List<New> findList = newRepository.findByTitleRegexAndTimestampGreaterThan(".*" + query + ".*", System.currentTimeMillis() - 3600000, sort);
-        if (findList.size() < 1) {
-            return searchAll(query);
-        }
-        return findList
+    public List<NewDTO> find(String query, int page, String day) {
+        return newRepository.findPageByTitleRegexAndTimestampGreaterThan(".*" + query + ".*", getTime(day), PageRequest.of(page, 20))
                 .stream()
-                .map(n -> modelMapper.map(n, NewDTO.class)).toList();
+                .map(n -> modelMapper.map(n, NewDTO.class))
+                .toList();
     }
+
+    @Override
+    public List<NewDTO> get(String query, int page, String day) {
+        if (newRepository.existsByTitleRegexIgnoreCaseAndTimestampGreaterThan(".*" + query + ".*", getTimeForCheckPage(day, page))) {
+            return find(query, page, Sort.by(Sort.Direction.DESC, "timestamp"), day);
+        } else {
+            return searchAndSave(query, page, day);
+        }
+
+    }
+
+
+    @Override
+    public List<NewDTO> getAll(String query, String day) {
+        if (newRepository.existsByTitleRegexIgnoreCaseAndTimestampGreaterThan(".*" + query + ".*", getTimeForCheckAll(day))) {
+            return findAll(query, Sort.by(Sort.Direction.DESC, "timestamp"), day);
+        } else {
+            return searchAndSaveAll(query, day);
+        }
+    }
+
+
+    private @Nullable NewsApiResponseDTO searchNews(String query, int page, String day) {
+        try {
+            String url = "https://mediametrics.ru/satellites/api/search/?ac=search&nolimit=1&q=%s&p=%s&d=%s&callback=JSON";
+            HttpResponse httpResponse = httpClient.execute(new HttpGet(String.format(url, URLEncoder.encode(query, StandardCharsets.UTF_8), page, day)));
+            HttpEntity entity = httpResponse.getEntity();
+            if (entity != null) {
+                NewsApiResponseDTO responseDTO = gson.fromJson(EntityUtils.toString(entity), NewsApiResponseDTO.class);
+                EntityUtils.consume(entity);
+                return responseDTO;
+            } else {
+                return null;
+            }
+        } catch (IOException e) {
+            throw new ServerException.HttpClientException("Server error.");
+        }
+    }
+
+
+    private void saveNewsToDatabase(@NotNull List<NewDTO> newsList) {
+        newRepository.saveAll(newsList.stream().map(n -> modelMapper.map(n, New.class)).toList());
+    }
+
+    private long getTime(@NotNull String day) {
+        long time = ONE_DAY;
+        if (day.equalsIgnoreCase("week"))
+            time = ONE_WEEK;
+
+        return System.currentTimeMillis() - time;
+    }
+
+    private long getTimeForCheckPage(@NotNull String day, int page) {
+        page++;
+        if (day.equalsIgnoreCase("week")) {
+            return System.currentTimeMillis() - (page * ONE_HOUR);
+        } else {
+            return System.currentTimeMillis() - (page * (ONE_HOUR / 2));
+        }
+    }
+
+    private long getTimeForCheckAll(@NotNull String day) {
+        if (day.equalsIgnoreCase("week")) {
+            return System.currentTimeMillis() - (2 * ONE_HOUR);
+        } else {
+            return System.currentTimeMillis() - (ONE_HOUR / 2);
+        }
+    }
+
 
 }
