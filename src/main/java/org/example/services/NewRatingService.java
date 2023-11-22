@@ -7,5 +7,7 @@ import java.util.List;
 public interface NewRatingService {
     List<NewRatingDTO> findRatingAll();
 
-    List<NewRatingDTO> searchRatingAll();
+    List<NewRatingDTO> searchRatingAndSaveAll();
+    void deleteAll();
+
 }

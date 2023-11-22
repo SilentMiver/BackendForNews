@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ControllerAdvice
 public class ServerExceptionHandler {
     @ExceptionHandler(ServerException.HttpClientException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<String> handleHttpClientException(ServerException.HttpClientException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }

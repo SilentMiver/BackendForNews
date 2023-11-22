@@ -8,11 +8,11 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.Index;
 
 @Configuration
-public class CollectionsConfiguration {
+public class MongoConfiguration {
     private final MongoTemplate mongoTemplate;
 
     @Autowired
-    public CollectionsConfiguration(MongoTemplate mongoTemplate) {
+    public MongoConfiguration(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
     }
 

@@ -7,7 +7,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface NewRatingRepository extends CrudRepository<NewRating,Long> {
+public interface NewRatingRepository extends CrudRepository<NewRating, Long> {
     List<NewRating> findAll();
+
+    <S extends NewRating> Iterable<S> saveAll(Iterable<S> entities);
+
+    void deleteAll();
 
 }
