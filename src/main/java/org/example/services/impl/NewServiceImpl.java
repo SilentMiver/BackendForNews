@@ -16,6 +16,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@CacheConfig(cacheNames = "ns")
 public class NewServiceImpl implements NewService {
     private NewRepository newRepository;
     private final ModelMapper modelMapper;
@@ -51,8 +55,8 @@ public class NewServiceImpl implements NewService {
 
 
     @Override
+    @CacheEvict(value = {"findSort", "find", "findAll", "findAllSort"}, allEntries = true)
     public List<NewDTO> searchAndSaveAll(String query, String day) {
-
         NewsApiResponseDTO responseDTO = searchNews(query, 0, day);
         int count = newRepository.countByTitleRegexIgnoreCaseAndTimestampGreaterThan(".*" + query + ".*", getTime(day));
         if (responseDTO == null || responseDTO.getNews() == null || responseDTO.getTotal() == 0)
@@ -75,6 +79,7 @@ public class NewServiceImpl implements NewService {
     }
 
     @Override
+    @CacheEvict(value = {"findSort", "find", "findAll", "findAllSort"}, allEntries = true)
     public List<NewDTO> searchAndSave(String query, int page, String day) {
         NewsApiResponseDTO responseDTO = searchNews(query, page, day);
         if (responseDTO == null || responseDTO.getNews() == null || responseDTO.getTotal() == 0)
@@ -85,6 +90,7 @@ public class NewServiceImpl implements NewService {
 
 
     @Override
+    @Cacheable(value = "findAllSort", unless = "#result==null", key = "#query+'_'+#sort+'_'+#day")
     public List<NewDTO> findAll(String query, Sort sort, String day) {
         return newRepository.findByTitleRegexAndTimestampGreaterThan(".*" + query + ".*", getTime(day), sort)
                 .stream()
@@ -93,6 +99,7 @@ public class NewServiceImpl implements NewService {
     }
 
     @Override
+    @Cacheable(value = "findAll", unless = "#result==null", key = "#query+'_'+#day")
     public List<NewDTO> findAll(String query, String day) {
         return newRepository.findByTitleRegexAndTimestampGreaterThan(".*" + query + ".*", getTime(day))
                 .stream()
@@ -101,6 +108,7 @@ public class NewServiceImpl implements NewService {
     }
 
     @Override
+    @Cacheable(value = "findSort", unless = "#result==null", key = "#query+'_'+#page+'_'+#sort+'_'+#day")
     public List<NewDTO> find(String query, int page, Sort sort, String day) {
         return newRepository.findPageByTitleRegexAndTimestampGreaterThan(".*" + query + ".*", getTime(day), PageRequest.of(page, 20).withSort(sort))
                 .stream()
@@ -109,6 +117,7 @@ public class NewServiceImpl implements NewService {
     }
 
     @Override
+    @Cacheable(value = "find", unless = "#result==null", key = "#query+'_'+#page+'_'+#day")
     public List<NewDTO> find(String query, int page, String day) {
         return newRepository.findPageByTitleRegexAndTimestampGreaterThan(".*" + query + ".*", getTime(day), PageRequest.of(page, 20))
                 .stream()
@@ -158,7 +167,7 @@ public class NewServiceImpl implements NewService {
     private void saveNewsToDatabase(@NotNull List<NewDTO> newsList) {
         newRepository.saveAll(newsList.stream().map(n -> modelMapper.map(n, New.class)).toList());
     }
-
+ 
     private long getTime(@NotNull String day) {
         long time = ONE_DAY;
         if (day.equalsIgnoreCase("week"))

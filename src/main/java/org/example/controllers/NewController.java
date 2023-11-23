@@ -3,6 +3,8 @@ package org.example.controllers;
 import org.example.dtos.NewDTO;
 import org.example.services.NewService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 

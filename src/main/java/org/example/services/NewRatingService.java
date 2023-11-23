@@ -8,6 +8,7 @@ public interface NewRatingService {
     List<NewRatingDTO> findRatingAll();
 
     List<NewRatingDTO> searchRatingAndSaveAll();
+
     void deleteAll();
 
 }

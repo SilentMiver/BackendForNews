@@ -1,6 +1,8 @@
 package org.example.dtos;
 
-public class NewRatingDTO {
+import java.io.Serializable;
+
+public class NewRatingDTO implements Serializable {
     private long id;
     private String title;
     private String domain;

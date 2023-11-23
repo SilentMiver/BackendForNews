@@ -15,6 +15,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableRedisRepositories
@@ -36,9 +38,9 @@ public class RedisConfiguration {
     }
 
     @Bean
-    public RedisTemplate<String, NewRating> redisTemplate() {
+    public RedisTemplate<String, NewRating> redisTemplate(JedisConnectionFactory jedisConnectionFactory) {
         RedisTemplate<String, NewRating> template = new RedisTemplate<>();
-        template.setConnectionFactory(jedisConnectionFactory());
+        template.setConnectionFactory(jedisConnectionFactory);
         return template;
     }
 
@@ -53,11 +55,16 @@ public class RedisConfiguration {
     }
 
     @Bean
-    public RedisCacheManager redisCacheManager() {
-        RedisCacheWriter redisCacheWriter = RedisCacheWriter.nonLockingRedisCacheWriter(jedisConnectionFactory());
-        RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(15));
-        return new RedisCacheManager(redisCacheWriter, redisCacheConfiguration);
+    public RedisCacheManager redisCacheManager(JedisConnectionFactory jedisConnectionFactory) {
+        RedisCacheWriter redisCacheWriter = RedisCacheWriter.nonLockingRedisCacheWriter(jedisConnectionFactory);
+        RedisCacheConfiguration nrsCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofHours(1));
+        RedisCacheConfiguration nsCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofMinutes(5));
+        Map<String,RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
+        cacheConfigurations.put("nrs",nrsCacheConfiguration);
+        cacheConfigurations.put("ns",nsCacheConfiguration);
+        return new RedisCacheManager(redisCacheWriter, RedisCacheConfiguration.defaultCacheConfig(),cacheConfigurations);
     }
 
 

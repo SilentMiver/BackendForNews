@@ -2,8 +2,10 @@ package org.example.dtos;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 
-public class NewDTO {
+
+public class NewDTO implements Serializable {
     @SerializedName("timestamp")
     private Long timestamp;
     @SerializedName("mm_id")
