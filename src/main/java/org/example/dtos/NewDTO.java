@@ -4,7 +4,6 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
-
 public class NewDTO implements Serializable {
     @SerializedName("timestamp")
     private Long timestamp;
@@ -18,6 +17,9 @@ public class NewDTO implements Serializable {
     private String countryName;
     @SerializedName("region_name")
     private String regionName;
+
+    @SerializedName("url")
+    private String url;
 
     public long getId() {
         return id;
@@ -49,6 +51,10 @@ public class NewDTO implements Serializable {
 
     public String getRegionName() {
         return regionName;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public void setId(long id) {
@@ -83,16 +89,22 @@ public class NewDTO implements Serializable {
         this.regionName = regionName;
     }
 
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+    }
+
     @Override
     public String toString() {
         return "NewDTO{" +
                 "timestamp=" + timestamp +
+                ", id=" + id +
                 ", title='" + title + '\'' +
                 ", domain='" + domain + '\'' +
                 ", country='" + country + '\'' +
                 ", traffic='" + traffic + '\'' +
                 ", countryName='" + countryName + '\'' +
                 ", regionName='" + regionName + '\'' +
+                ", url='" + url + '\'' +
                 '}';
     }
 }

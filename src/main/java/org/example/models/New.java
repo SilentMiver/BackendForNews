@@ -17,11 +17,13 @@ public class New {
     private String countryName;
     private String regionName;
 
+    private String url;
+
     protected New() {
 
     }
 
-    public New(long id, long timestamp, String title, String domain, String country, String traffic, String countryName, String regionName) {
+    public New(long id, long timestamp, String title, String domain, String country, String traffic, String countryName, String regionName, String url) {
         this.id = id;
         this.timestamp = timestamp;
         this.title = title;
@@ -30,6 +32,7 @@ public class New {
         this.traffic = traffic;
         this.countryName = countryName;
         this.regionName = regionName;
+        this.url = url;
     }
 
     public long getId() {
@@ -66,6 +69,10 @@ public class New {
         return traffic;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
@@ -95,6 +102,10 @@ public class New {
         this.traffic = traffic;
     }
 
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     protected void setId(long id) {
         this.id = id;
     }
@@ -110,6 +121,7 @@ public class New {
                 ", traffic='" + traffic + '\'' +
                 ", countryName='" + countryName + '\'' +
                 ", regionName='" + regionName + '\'' +
+                ", url='" + url + '\'' +
                 '}';
     }
 }

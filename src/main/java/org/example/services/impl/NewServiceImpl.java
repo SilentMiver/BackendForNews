@@ -61,9 +61,12 @@ public class NewServiceImpl implements NewService {
         int count = newRepository.countByTitleRegexIgnoreCaseAndTimestampGreaterThan(".*" + query + ".*", getTime(day));
         if (responseDTO == null || responseDTO.getNews() == null || responseDTO.getTotal() == 0)
             return List.of();
-        saveNewsToDatabase(responseDTO.getNews());
         int iter = Math.ceilDiv((responseDTO.getTotal() - count), 20);
+        if (iter < 0) {
+            return findAll(query, Sort.by(Sort.Direction.DESC, "timestamp"), day);
+        }
         List<NewDTO> result = new ArrayList<>(20 * iter);
+        result.addAll(responseDTO.getNews());
         for (int i = 1; i <= iter; i++) {
             result.addAll(search(query, i, day));
         }
@@ -167,7 +170,7 @@ public class NewServiceImpl implements NewService {
     private void saveNewsToDatabase(@NotNull List<NewDTO> newsList) {
         newRepository.saveAll(newsList.stream().map(n -> modelMapper.map(n, New.class)).toList());
     }
- 
+
     private long getTime(@NotNull String day) {
         long time = ONE_DAY;
         if (day.equalsIgnoreCase("week"))
