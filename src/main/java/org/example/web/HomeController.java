@@ -27,7 +27,7 @@ public class HomeController {
     @GetMapping("/all")
     public String getAllNews(@RequestParam(name = "dayFilter", required = false , defaultValue = "day") String dayFilter,
                                @RequestParam(name = "queryFilter", required = false, defaultValue = "Россия") String queryFilter,
-
+                             @RequestParam(name = "pageFilter", required = false) String pageFilter,
                                Model model) {
 
         Iterable<NewDTO> news = null;
@@ -36,14 +36,12 @@ public class HomeController {
             if (StringUtils.isNotBlank(dayFilter) && StringUtils.isNotBlank(queryFilter)) {
                 validateQuery(queryFilter);
 
-                news = newService.getAll(queryFilter, queryFilter);
-//            } else if (StringUtils.isNotBlank(dayFilter)) {
-//                news = newService.finaAllByBrandName(dayFilter);
-//            } else if (StringUtils.isNotBlank(queryFilter)) {
-//                news = newService.finaAllByPrice(Integer.parseInt(queryFilter));
-//            } else {
-//                news = newService.getAll();
+                news = newService.getAll(queryFilter, dayFilter);
+            }  else if (StringUtils.isNotBlank(dayFilter) && StringUtils.isNotBlank(queryFilter) && StringUtils.isNotBlank(pageFilter)) {
+                validatePage(Integer.parseInt(pageFilter));
+                news = newService.get(queryFilter, Integer.parseInt(pageFilter),dayFilter);
             }
+
             model.addAttribute("allNews", news);
 
             return "news/home";
