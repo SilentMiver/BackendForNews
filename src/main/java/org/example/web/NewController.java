@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class NewController {
     private final NewService newService;
 
+
     @Autowired
     public NewController(NewService newService) {
         this.newService = newService;
