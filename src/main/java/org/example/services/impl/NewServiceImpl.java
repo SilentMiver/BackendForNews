@@ -8,6 +8,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.example.dtos.NewDTO;
 import org.example.dtos.NewsApiResponseDTO;
+import org.example.dtos.ShowNewsAll;
 import org.example.exceptions.ServerException;
 import org.example.models.New;
 import org.example.repositories.NewRepository;
@@ -28,6 +29,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @CacheConfig(cacheNames = "ns")
@@ -61,7 +63,7 @@ public class NewServiceImpl implements NewService {
         int count = newRepository.countByTitleRegexIgnoreCaseAndTimestampGreaterThan(".*" + query + ".*", getTime(day));
         if (responseDTO == null || responseDTO.getNews() == null || responseDTO.getTotal() == 0)
             return List.of();
-        int iter = Math.ceilDiv((responseDTO.getTotal() - count), 20);
+        int iter = (int) Math.ceil((responseDTO.getTotal() - count)/20);
         if (iter < 0) {
             return findAll(query, Sort.by(Sort.Direction.DESC, "timestamp"), day);
         }
@@ -72,6 +74,14 @@ public class NewServiceImpl implements NewService {
         }
         saveNewsToDatabase(result);
         return findAll(query, Sort.by(Sort.Direction.DESC, "timestamp"), day);
+    }
+
+    public List<ShowNewsAll> searchAndSaveAllForDisplay(String query, String day) {
+        List<NewDTO> newDTOs = searchAndSaveAll(query, day);
+
+        return newDTOs.stream()
+                .map(newDTO -> modelMapper.map(newDTO, ShowNewsAll.class))
+                .collect(Collectors.toList());
     }
 
     private List<NewDTO> search(String query, int page, String day) {
