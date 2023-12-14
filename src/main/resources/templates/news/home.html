@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Page</title>
+</head>
+<body>
+<h2>News Search</h2>
+
+<form th:action="@{/all}" method="get">
+    <label for="dayFilter">Day Filter:</label>
+    <select name="dayFilter" id="dayFilter">
+        <option value="day">Day</option>
+        <option value="week">Week</option>
+    </select>
+
+    <label for="queryFilter">Query:</label>
+    <input type="text" name="queryFilter" id="queryFilter">
+
+    <label for="pageFilter">Page:</label>
+    <input type="text" name="pageFilter" id="pageFilter">
+
+    <button type="submit">Search</button>
+</form>
+
+<h3>Search Results:</h3>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Domain</th>
+        <th>Country</th>
+        <th>Timestamp</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Iterate over the list of news and display each item -->
+    <tr th:each="news : ${allNews}">
+        <td th:text="${news.id}"></td>
+        <td th:text="${news.title}"></td>
+        <td th:text="${news.domain}"></td>
+        <td th:text="${news.country}"></td>
+        <td th:text="${news.timestamp}"></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
