@@ -84,9 +84,9 @@
         <div class="card-body">
             <p class="card-text"><strong>ID:</strong> <span th:text="${news.id}"></span></p>
             <p class="card-text"><strong>Domain:</strong> <span th:text="${news.domain}"></span></p>
-            <p class="card-text"><strong>Country:</strong> <span th:text="${news.country}"></span></p>
-            <p class="card-text"><strong>Timestamp:</strong> <span th:text="${news.timestamp}"></span></p>
-            <a th:href="@{'new/search/all?q=' + ${news.title}}">More</a>
+            <p class="card-text"><strong>Town:</strong> <span th:text="${news.regionName}"></span></p>
+            <p class="card-text"><strong>Date:</strong> <span th:text="${news.timestamp}"></span></p>
+            <a class="btn btn-primary"  th:href="@{'new/search/all?q=' + ${news.title}}">More</a>
         </div>
     </div>
 </div>
