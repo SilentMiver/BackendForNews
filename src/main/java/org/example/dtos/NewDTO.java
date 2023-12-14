@@ -3,11 +3,10 @@ package org.example.dtos;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
-import java.util.Date;
 
 public class NewDTO implements Serializable {
     @SerializedName("timestamp")
-    private Date timestamp;
+    private Long timestamp;
     @SerializedName("mm_id")
     private long id;
     private String title;
@@ -26,7 +25,7 @@ public class NewDTO implements Serializable {
         return id;
     }
 
-    public Date getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
@@ -63,7 +62,7 @@ public class NewDTO implements Serializable {
     }
 
     public void setTimestamp(long timestamp) {
-        this.timestamp = new Date(timestamp);
+        this.timestamp = timestamp;
     }
 
     public void setTitle(String title) {
@@ -90,7 +89,9 @@ public class NewDTO implements Serializable {
         this.regionName = regionName;
     }
 
-
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+    }
 
     @Override
     public String toString() {
