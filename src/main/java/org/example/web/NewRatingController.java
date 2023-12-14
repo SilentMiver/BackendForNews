@@ -1,4 +1,4 @@
-package org.example.controllers;
+package org.example.web;
 
 import org.example.dtos.NewRatingDTO;
 import org.example.services.NewRatingService;
