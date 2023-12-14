@@ -1,6 +1,7 @@
 package org.example.services;
 
 import org.example.dtos.NewDTO;
+import org.example.dtos.ShowNewsAll;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.List;
 public interface NewService {
     //Получение всех с сайта за день/неделю.
     List<NewDTO> searchAndSaveAll(String query, String day);
+    List<ShowNewsAll> searchAndSaveAllForDisplay(String query, String day);
 
     //Получение страницы из 20 новостей с сайта за день/неделю.
     List<NewDTO> searchAndSave(String query, int page, String day);
