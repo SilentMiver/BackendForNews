@@ -46,7 +46,7 @@
       color: #fff;
       text-align: center;
       padding: 10px 0;
-      margin-top: 20px; /* Добавим отступ от нижней части контейнера */
+      margin-top: 20px;
     }
   </style>
 </head>
@@ -62,17 +62,19 @@
       <th>Title</th>
       <th>Country</th>
       <th>Region</th>
+      <th>URL</th>
     </tr>
     </thead>
     <tbody>
     <!-- Use Thymeleaf or other template engine syntax to iterate over the "all" attribute -->
-    <!-- Assuming NewDTO has appropriate getters like getTitle(), getCountryName(), getRegionName() -->
+    <!-- Assuming NewDTO has appropriate getters like getTitle(), getCountryName(), getRegionName(), getUrl() -->
     <!-- Replace "all" with the actual variable name holding your results -->
     <!-- You may need to adjust these based on your actual NewDTO structure -->
     <tr th:each="entry : ${all}">
       <td th:text="${entry.title}"></td>
       <td th:text="${entry.countryName}"></td>
       <td th:text="${entry.regionName}"></td>
+      <td><a th:href="${entry.url}" th:text="${entry.url}" target="${entry.url}">Link</a></td>
     </tr>
     <!-- End of loop -->
     </tbody>
