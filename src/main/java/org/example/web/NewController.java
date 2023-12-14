@@ -1,17 +1,20 @@
-package org.example.controllers;
+package org.example.web;
 
 import org.example.dtos.NewDTO;
 import org.example.exceptions.ClientException;
 import org.example.services.NewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 
-@RestController
+@Controller
 @RequestMapping("/new")
 public class NewController {
     private final NewService newService;
+
 
     @Autowired
     public NewController(NewService newService) {
@@ -19,9 +22,11 @@ public class NewController {
     }
 
     @GetMapping("/search/all")
-    public Iterable<NewDTO> searchAll(@RequestParam("q") String query, @RequestParam(value = "d", required = false, defaultValue = "day") String day) {
+    public String searchAll(@RequestParam("q") String query, @RequestParam(value = "d", required = false, defaultValue = "day") String day, Model model) {
         validateQuery(query);
-        return newService.searchAndSaveAll(query, day);
+        model.addAttribute("all", newService.searchAndSaveAllForDisplay(query, day));
+
+        return "news/index"; // Возвращает имя представления
     }
 
     @GetMapping("/search")
